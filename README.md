@@ -5,7 +5,7 @@ This tool generates a dependencies graph report, printing on console or saving o
 
 ## Example for Wordpress iOS app dependencies ##
 
-![the dependency wheel for wordpress iOS app](https://github.com/erickjung/cocoapods-graph/blob/master/docs/wordpress_example.gif)
+![the dependency wheel for wordpress iOS app](https://github.com/erickjung/cocoapods-graph/blob/master/docs/wordpress_example.gif=640)
 
 
 ## Installation ##
