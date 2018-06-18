@@ -8,6 +8,10 @@ This tool generates a dependencies graph report, printing on console or saving o
 
 ![the dependency wheel for wordpress iOS app](https://github.com/erickjung/cocoapods-graph/blob/master/docs/wordpress_example.gif)
 
+## Installing ##
+```shell
+[sudo] pip install cocoapods-graph
+```
 
 ## How to use ##
 ```shell

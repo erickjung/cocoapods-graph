@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # Copyright (c) 2018 Erick Jung
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,9 +23,10 @@ import sys
 import json
 from optparse import OptionParser
 
+__version__ = "0.1.1"
+
 PROJECT_NAME = "cocoapods-graph"
 PROJECT_DESCRIPTION = "cocoapods dependencies graph generator"
-PROJECT_VERSION = "0.1.0"
 PROJECT_AUTHOR = "erick jung (erickjung@gmail.com)"
 
 class PodClass:
@@ -119,7 +118,7 @@ def save_html_wheel_file(data, fileName):
 
 def main():
     if len(sys.argv) == 1:
-        print "%s - %s (%s)\nby %s\n" % (PROJECT_NAME, PROJECT_VERSION, PROJECT_DESCRIPTION, PROJECT_AUTHOR)
+        print "%s - %s (%s)\nby %s\n" % (PROJECT_NAME, __version__, PROJECT_DESCRIPTION, PROJECT_AUTHOR)
         print "type: -h to see more information"
         sys.exit(1)
 
@@ -155,6 +154,3 @@ def main():
             save_html_wheel_file(result, options.file)
 
         print "done"
-
-if __name__ == '__main__':
-    main()
