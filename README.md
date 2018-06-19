@@ -15,7 +15,7 @@ This tool generates a dependencies graph report, printing on console or saving o
 
 ## How to use ##
 ```shell
-cocoapods-graph -f Podfile --html
+cocoapods-graph -f Podfile.lock --html
 ```
 
 ## Thanks ##
