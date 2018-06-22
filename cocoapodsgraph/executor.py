@@ -40,9 +40,9 @@ class PodClass:
         self.dependencies = dependencies
 
     def printObject(self):
-        print self.name + " " + self.version
+        print(self.name + " " + self.version)
         for dep in self.dependencies:
-            print "  " + dep.name + " " + dep.version
+            print("  " + dep.name + " " + dep.version)
 
 # ---------
 
@@ -118,8 +118,8 @@ def save_html_wheel_file(data, fileName):
 
 def main():
     if len(sys.argv) == 1:
-        print "%s - %s (%s)\nby %s\n" % (PROJECT_NAME, __version__, PROJECT_DESCRIPTION, PROJECT_AUTHOR)
-        print "type: -h to see more information"
+        print("%s - %s (%s)\nby %s\n" % (PROJECT_NAME, __version__, PROJECT_DESCRIPTION, PROJECT_AUTHOR))
+        print("type: -h to see more information")
         sys.exit(1)
 
     parser = OptionParser("usage: %prog [options] filename")
@@ -132,7 +132,7 @@ def main():
     if len(options.file) != 0:
 
         if options.show != True and options.json != True and options.html != True:
-            print "you must select an output option (show | json | html)\n"
+            print("you must select an output option (show | json | html)\n")
             sys.exit(1)
 
         if ".lock" not in options.file:
@@ -141,16 +141,16 @@ def main():
         result = parse_lock_file(options.file)
 
         if options.show:
-            print "Printing dependencies..."
+            print("Printing dependencies...")
             for pod in result:
                 pod.printObject()
 
         if options.json:
-            print "Saving json file..."
+            print("Saving json file...")
             save_json_file(result, options.file)
 
         if options.html:
-            print "Saving html file..."
+            print("Saving html file...")
             save_html_wheel_file(result, options.file)
 
-        print "done"
+        print("done")
