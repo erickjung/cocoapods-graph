@@ -23,7 +23,7 @@ import sys
 import json
 from optparse import OptionParser
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 PROJECT_NAME = "cocoapods-graph"
 PROJECT_DESCRIPTION = "cocoapods dependencies graph generator"
