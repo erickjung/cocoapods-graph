@@ -73,6 +73,8 @@ def parse_lock_file(fileName):
         elif line.startswith('    -'):
             pod.dependencies.append(parse_lock_pods_line(line))
         elif line.startswith('DEPENDENCIES'):
+            if len(pod.name) > 0:
+                resultList.append(pod)
             break
             
     return resultList
