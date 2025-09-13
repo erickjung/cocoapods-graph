@@ -17,7 +17,6 @@ module CocoaPodsGraph
     VERSION = CocoaPodsGraph::VERSION
 
     def self.run
-  puts '[DEBUG] Entered CLI.run'
   options = {}
       
       # Print version immediately if requested
@@ -68,32 +67,27 @@ module CocoaPodsGraph
         end
 
   result = CocoaPodsGraph::Generator.parse_lock_file(options[:file])
-  puts "[DEBUG] Parsed result: #{result.inspect}"
 
         any_output = false
         if options[:show]
-          puts '[DEBUG] --show option triggered'
           puts 'Printing dependencies...'
           result.each(&:print_object)
           any_output = true
         end
 
         if options[:json]
-          puts '[DEBUG] --json option triggered'
           puts 'Saving JSON file...'
           CocoaPodsGraph::Generator.save_json_file(result, options[:file])
           any_output = true
         end
 
         if options[:html]
-          puts '[DEBUG] --html option triggered'
           puts 'Saving HTML file...'
           CocoaPodsGraph::Generator.save_html_wheel_file(result, options[:file])
           any_output = true
         end
 
         if any_output
-          puts '[DEBUG] Done!'
         else
           puts 'You must select an output option (--show | --json | --html)'
           exit(1)
