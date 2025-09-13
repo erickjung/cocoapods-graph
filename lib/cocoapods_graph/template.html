@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CocoaPods Dependencies Graph</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        
+        .chart-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chart-subtitle {
+            color: #718096;
+            font-size: 0.95rem;
+        }
+        
+        #chart_placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+            position: relative;
+        }
+        
+        .dependencyWheel {
+            font: 11px "Inter", sans-serif;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        
+        .group text {
+            font-weight: 500;
+            font-size: 11px;
+        }
+        
+        .chord {
+            transition: opacity 0.3s ease;
+        }
+        
+        .group path {
+            transition: all 0.3s ease;
+        }
+        
+        .group:hover path {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+        
+        .instructions {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .instructions h3 {
+            color: #2d3748;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .instructions ul {
+            color: #4a5568;
+            font-size: 0.9rem;
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 0.3rem;
+            padding-left: 1.2rem;
+            position: relative;
+        }
+        
+        .instructions li::before {
+            content: "•";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .search-container {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .search-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .search-input-container {
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f7fafc;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f7fafc;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .search-result-version {
+            font-size: 0.85rem;
+            color: #718096;
+            font-family: monospace;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .chart-container { padding: 1rem; margin: 0 0.5rem 1rem; }
+            .stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 CocoaPods Dependencies</h1>
+        <p>Interactive dependency visualization for your iOS project</p>
+    </div>
+    
+    <div class="main-container">
+        <div class="stats" id="stats"></div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">Dependencies Wheel</h2>
+                <p class="chart-subtitle">Hover over packages to explore relationships</p>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-header">
+                    🔍 Search Packages
+                </div>
+                <div class="search-input-container">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="packageSearch" 
+                        class="search-input" 
+                        placeholder="Type package name to search and highlight..."
+                        autocomplete="off"
+                    />
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+            
+            <div id="chart_placeholder">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading dependency graph...
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎯 How to use this visualization</h3>
+            <ul>
+                <li>Hover over any package name or arc to highlight its dependencies</li>
+                <li>The curves (chords) show dependency relationships between packages</li>
+                <li>Thicker arcs represent packages with more dependencies</li>
+                <li>Colors help distinguish different packages and their relationships</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Generated by CocoaPods Graph • Made with ❤️ by <a href="https://www.erickjung.com" target="_blank" style="color: rgba(255,255,255,0.9); text-decoration: none;">E7G</a><br>
+        <small>Generated on P_GENERATION_DATE</small>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
+    <script>
+        // Parse data and show stats
+        const data = JSON.parse(P_DATA_JSON);
+        const totalPackages = data.packages.length;
+        const appDependencies = Object.keys(data.packages[0].require).length;
+        const totalDependencies = data.packages.reduce((sum, pkg) => sum + Object.keys(pkg.require).length, 0);
+        
+        document.getElementById("stats").innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${totalPackages}</div>
+                <div class="stat-label">Total Packages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${appDependencies}</div>
+                <div class="stat-label">Direct Dependencies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${totalDependencies}</div>
+                <div class="stat-label">Total Dependencies</div>
+            </div>
+        `;
+        
+        // D3 dependency wheel code
+        d3.chart=d3.chart||{},d3.chart.dependencyWheel=function(e){var t=window,r=document,n=r.documentElement,a=r.getElementsByTagName("body")[0],c=(t.innerWidth||n.clientWidth||a.clientWidth,t.innerHeight||n.clientHeight||a.clientHeight,200),i=.03,o=960;function u(e){e.each(function(e){var t=e.matrix,r=e.packageNames,n=o/2-c,a=d3.chord().padAngle(i).sortSubgroups(d3.descending),u=d3.select(this).selectAll("svg").data([e]).enter().append("svg:svg").attr("width",o).attr("height",o).attr("class","dependencyWheel").append("g").attr("transform","translate("+o/2+","+o/2+")"),d=d3.arc().innerRadius(n).outerRadius(n+20),l=function(e){return 0===e.index?"#ccc":"hsl("+parseInt((r[e.index][0].charCodeAt()-97)/26*360,10)+",90%,70%)"},s=function(e){return function(t,r){u.selectAll(".chord").filter(function(e){return e.source.index!=r&&e.target.index!=r}).transition().style("opacity",e);var n=[];u.selectAll(".chord").filter(function(e){e.source.index==r&&n.push(e.target.index),e.target.index==r&&n.push(e.source.index)}),n.push(r);var a=n.length;u.selectAll(".group").filter(function(e){for(var t=0;t<a;t++)if(n[t]==e.index)return!1;return!0}).transition().style("opacity",e)}},g=a(t),p=g.groups[0],h=-(p.endAngle-p.startAngle)/2*(180/Math.PI),f=u.selectAll("g.group").data(g.groups).enter().append("svg:g").attr("class","group").attr("transform",function(e){return"rotate("+h+")"});f.append("svg:path").style("fill",l).style("stroke",l).attr("d",d).style("cursor","pointer").on("mouseover",s(.1)).on("mouseout",s(1)),f.append("svg:text").each(function(e){e.angle=(e.startAngle+e.endAngle)/2}).attr("dy",".35em").attr("text-anchor",function(e){return e.angle>Math.PI?"end":null}).attr("transform",function(e){return"rotate("+(180*e.angle/Math.PI-90)+")translate("+(n+26)+")"+(e.angle>Math.PI?"rotate(180)":"")}).style("cursor","pointer").text(function(e){return r[e.index]}).on("mouseover",s(.1)).on("mouseout",s(1)),u.selectAll("path.chord").data(g).enter().append("svg:path").attr("class","chord").style("stroke",function(e){return d3.rgb(l(e.source)).darker()}).style("fill",function(e){return l(e.source)}).attr("d",d3.ribbon().radius(n)).attr("transform",function(e){return"rotate("+h+")"}).style("opacity",1)})}return u.width=function(e){return arguments.length?(o=e,u):o},u.margin=function(e){return arguments.length?(c=e,u):c},u.padding=function(e){return arguments.length?(i=e,u):i},u};
+        var buildMatrixFromDependencies=function(e){var t=e.packages,r={},n={},a=[],c=0,i={};return t.forEach(function(e){if(e.replace)for(replaced in e.replace)i[replaced]=e.name}),t.forEach(function(e){for(packageName in e.require)packageName in i&&(e.require[i[packageName]]=e.require[packageName],delete e.require[packageName])}),t.forEach(function(e){packageName=e.name,packageName in r||(n[c]=packageName,r[packageName]=c++)}),t.forEach(function(e){var t=r[e.name],n=a[t];if(!n){n=a[t]=[];for(var i=-1;++i<c;)n[i]=0}for(packageName in e.require)n[r[packageName]]++}),a.forEach(function(e,t){for(var r=.001,n=-1;++n<c;){var a=(n+t)%c;1==e[a]&&(e[a]+=r,r+=.001)}}),{matrix:a,packageNames:n}};
+        
+        // Clear loading and render chart
+        d3.select("#chart_placeholder").selectAll("*").remove();
+        d3.select("#chart_placeholder").datum(buildMatrixFromDependencies(data)).call(d3.chart.dependencyWheel().width(P_DATA_WIDTH).margin(P_DATA_MARGIN).padding(P_DATA_PADDING));
+        
+        // Search functionality
+        let currentHighlightedIndex = -1;
+        const packageNames = data.packages.map(pkg => pkg.name);
+        
+        const searchInput = document.getElementById("packageSearch");
+        const searchResults = document.getElementById("searchResults");
+        
+        function highlightPackage(packageName, temporary = false) {
+            const packageIndex = packageNames.indexOf(packageName);
+            if (packageIndex === -1) return;
+            
+            // Find the corresponding group element and trigger mouseover
+            const svg = d3.select("#chart_placeholder svg");
+            const groups = svg.selectAll(".group");
+            
+            groups.each(function(d, i) {
+                if (i === packageIndex) {
+                    // Reset all to normal first
+                    resetHighlight();
+                    
+                    // Highlight this package
+                    currentHighlightedIndex = packageIndex;
+                    d3.select(this).select("path").style("stroke-width", "3px").style("filter", "brightness(1.2)");
+                    d3.select(this).select("text").style("font-weight", "bold").style("font-size", "13px");
+                    
+                    // Fade non-related elements
+                    svg.selectAll(".chord")
+                        .filter(function(chord) { 
+                            return chord.source.index !== packageIndex && chord.target.index !== packageIndex; 
+                        })
+                        .transition().style("opacity", 0.1);
+                    
+                    svg.selectAll(".group")
+                        .filter(function(group, idx) { 
+                            // Find related packages
+                            let related = [packageIndex];
+                            svg.selectAll(".chord").each(function(chord) {
+                                if (chord.source.index === packageIndex) related.push(chord.target.index);
+                                if (chord.target.index === packageIndex) related.push(chord.source.index);
+                            });
+                            return related.indexOf(idx) === -1;
+                        })
+                        .transition().style("opacity", 0.3);
+                }
+            });
+        }
+        
+        function resetHighlight() {
+            const svg = d3.select("#chart_placeholder svg");
+            svg.selectAll(".chord").transition().style("opacity", 1);
+            svg.selectAll(".group").transition().style("opacity", 1);
+            svg.selectAll(".group path").style("stroke-width", "1px").style("filter", "none");
+            svg.selectAll(".group text").style("font-weight", "500").style("font-size", "11px");
+            currentHighlightedIndex = -1;
+        }
+        
+        function performSearch(query) {
+            if (!query.trim()) {
+                searchResults.style.display = "none";
+                resetHighlight();
+                return;
+            }
+            
+            const filtered = data.packages.filter(pkg => 
+                pkg.name.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 10); // Limit to 10 results
+            
+            if (filtered.length === 0) {
+                searchResults.style.display = "none";
+                resetHighlight();
+                return;
+            }
+            
+            searchResults.innerHTML = filtered.map(pkg => `
+                <div class="search-result-item" data-package="${pkg.name}">
+                    <span class="search-result-name">${pkg.name}</span>
+                    <span class="search-result-version">${Object.keys(pkg.require).length} deps</span>
+                </div>
+            `).join("");
+            
+            searchResults.style.display = "block";
+            
+            // Add click handlers to results
+            searchResults.querySelectorAll(".search-result-item").forEach(item => {
+                item.addEventListener("click", function() {
+                    const packageName = this.dataset.package;
+                    searchInput.value = packageName;
+                    searchResults.style.display = "none";
+                    highlightPackage(packageName);
+                });
+                
+                item.addEventListener("mouseenter", function() {
+                    const packageName = this.dataset.package;
+                    highlightPackage(packageName, true);
+                });
+                
+                item.addEventListener("mouseleave", function() {
+                    if (currentHighlightedIndex === -1) {
+                        resetHighlight();
+                    }
+                });
+            });
+            
+            // Auto-highlight first result if exact match
+            if (filtered.length === 1 || filtered[0].name.toLowerCase() === query.toLowerCase()) {
+                highlightPackage(filtered[0].name, true);
+            }
+        }
+        
+        // Search input events
+        searchInput.addEventListener("input", function() {
+            performSearch(this.value);
+        });
+        
+        searchInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                const results = searchResults.querySelectorAll(".search-result-item");
+                if (results.length > 0) {
+                    results[0].click();
+                }
+            } else if (e.key === "Escape") {
+                this.value = "";
+                searchResults.style.display = "none";
+                resetHighlight();
+            }
+        });
+        
+        // Click outside to close search results
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest(".search-input-container")) {
+                searchResults.style.display = "none";
+            }
+        });
+        
+        // Double-click on chart to reset
+        document.getElementById("chart_placeholder").addEventListener("dblclick", function() {
+            searchInput.value = "";
+            searchResults.style.display = "none";
+            resetHighlight();
+        });
+    </script>
+</body>
+</html>
