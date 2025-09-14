@@ -171,47 +171,8 @@ We welcome contributions! Here's how you can help:
 5. **Push to the branch**: `git push origin my-new-feature`
 6. **Submit a pull request**
 
-### Ideas for Contributions
-- Add more visualization types (tree view, network graph)
-- Implement filtering and grouping options
-- Add export to other formats (SVG, PNG, PDF)
-- Create VS Code / Xcode extensions
-- Add support for other dependency managers
-
-## 📝 Changelog
-
-### v1.0.0 (2024-XX-XX)
-- 🎉 Initial release
-- ✨ Interactive dependency wheel visualization
-- 🔍 Smart search functionality
-- 📊 Statistics dashboard
-- 📱 Responsive design
-- 🌐 Self-contained HTML output
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Erick Jung** - [E7G](https://www.erickjung.com)
-- Email: talk@erickjung.com
-- GitHub: [@erickjung](https://github.com/erickjung)
-
-## 🙏 Acknowledgments
-
-- Built with [D3.js](https://d3js.org/) for beautiful visualizations
-- Inspired by the need for better dependency analysis tools
-- Thanks to the CocoaPods team for creating an amazing dependency manager
-
 ## ⭐ Support
 
 If you find this tool helpful, please give it a star on GitHub! ⭐
 
 Found a bug or have a feature request? [Open an issue](https://github.com/erickjung/cocoapods-graph/issues)
-
----
-
-<div align="center">
-  <sub>Built with ❤️ by <a href="https://www.erickjung.com">E7G</a></sub>
-</div>
